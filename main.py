@@ -21,30 +21,43 @@ def main():
     character = Character(joystick.width, joystick.height) # 캐릭터 객체 생성
     
     # 시작화면 타이틀 텍스트 폰트 설정
-    title_font_path = os.path.expanduser("~/esw/TA-ESW/game/Agbalumo-Regular.ttf") # 틸드를 확장하여 절대 경로로 변환
+    title_font_path = os.path.expanduser("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf") # 틸드를 확장하여 절대 경로로 변환
     title_font_size = 20
     title_position = (23, 50) # 위치
     title_font = ImageFont.truetype(title_font_path, title_font_size)
 
     # "Prees anykey to play" 폰트 설정
-    press_font_path = os.path.expanduser("~/esw/TA-ESW/game/KdamThmorPro-Regular.ttf")
+    press_font_path = os.path.expanduser("~/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf")
     press_font_size = 15
     press_position = ((40, 160)) # 위치
     press_font = ImageFont.truetype(press_font_path, press_font_size)
+
+    # 점수 폰트 설정
+    score_font_path = os.path.expanduser("~/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf")
+    score_font_size = 15
+    score_position = ((23, 30)) # 위치
+    score_font = ImageFont.truetype(score_font_path, score_font_size)
 
     # 시작 화면 구성
     while True:
         # 아무 키를 누르면 게임 시작
         if not joystick.button_U.value or not joystick.button_D.value or not joystick.button_L.value or not joystick.button_R.value or not joystick.button_A.value or not joystick.button_B.value:
+            time.sleep(0.5) # 누른 키가 게임에 적용되지 않도록 잠시 멈춤
             break
         my_draw.rectangle((0, 0, joystick.width, joystick.height), fill = (0, 0, 0, 100)) # 시작 화면
         my_draw.text(title_position, "The   Limit   Of   Speed", fill = "white", font = title_font) # 게임 제목
         my_draw.text(press_position, "Press  anykey  to  play", fill = "white", font = press_font)
         joystick.disp.image(my_image)
+
     a_time = 0 # a 버튼이 눌린 시간
+    a_flag = True # A 버튼이 여러번 눌리지 않도록 현재 상태 체크
+
+    start_time = time.time() # 게임 시작 시간
 
     while True:
-        cur_time = time.time() # 현재 시간 
+        cur_time = time.time() # 현재 시간
+        score = "{:.1f}".format(cur_time - start_time) # 게임 진행 시간 = 점수 (소수점 첫째자리까지)
+        
         command = {'move': False, 'up_pressed': False , 'down_pressed': False, 'left_pressed': False, 'right_pressed': False}
     
         if not joystick.button_U.value:  # up pressed
@@ -63,25 +76,27 @@ def main():
             command['right_pressed'] = True
             command['move'] = True
 
-        if not joystick.button_A.value: # A pressed
+        if not joystick.button_A.value and a_flag == True: # A pressed
             # energy가 0 이상이면, 3초 동안 속도 2배 증가
-            if character.energy > 0: # 여러번 눌리는 현상 수정해야함
+            if character.energy_check():
                 character.energy -= 1
                 a_time = time.time()
-                print(character.energy)
+            print(character.energy)
         
         # a버튼이 눌렸는지 계속해서 체크
-        character.a_pressed_check(a_time, cur_time)
+        a_flag = character.a_pressed_check(a_time, cur_time)
 
         # 캐릭터 이동
         character.move(command)
-        
     
         my_draw.rectangle((0, 0, joystick.width, joystick.height), fill = (255, 255, 255, 100))
         my_draw.ellipse(tuple(character.position), outline = character.outline, fill = (0, 0, 0))
+        my_draw.text(score_position, "SCORE: " + score, fill = "blue", font = score_font)
 
         #좌표는 동그라미의 왼쪽 위, 오른쪽 아래 점 (x1, y1, x2, y2)
         joystick.disp.image(my_image)
+    
+    end_time = time.time()
 
 if __name__ == '__main__':
     main()

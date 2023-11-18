@@ -41,6 +41,17 @@ class Character:
 
     def a_pressed_check(self, a_time, cur_time):
         if cur_time - a_time < 3:
-            self.speed = 10
+            self.speed = 10 
+            return False # A 버튼을 누를 수 없는 상태 (speed가 10인 상태) 이면 False
         else:
             self.speed = 5
+            return True # A 버튼을 누를 수 있는 상태 (speed가 5인 상태) 이면 True
+
+
+    # 에너지를 사용할 수 있는지 체크하는 함수 
+    def energy_check(self):
+        if self.energy == 0:
+            return False
+        else:
+            return True
+            
