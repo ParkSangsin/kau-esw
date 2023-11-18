@@ -48,5 +48,5 @@ class Joystick:
         self.backlight.value = True
 
         # 디스플레이의 가로 세로 길이
-        self.width = self.disp.width
-        self.height = self.disp.height
+        self.width = self.disp.width # 240
+        self.height = self.disp.height # 240
