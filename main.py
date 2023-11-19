@@ -9,6 +9,7 @@ from adafruit_rgb_display import st7789
 import numpy as np
 from Character import Character
 from Joystick import Joystick
+from Font import Font
 
 def main():
     # 조이스틱 객체 생성
@@ -21,22 +22,13 @@ def main():
     character = Character(joystick.width, joystick.height) # 캐릭터 객체 생성
     
     # 시작화면 타이틀 텍스트 폰트 설정
-    title_font_path = os.path.expanduser("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf") # 틸드를 확장하여 절대 경로로 변환
-    title_font_size = 20
-    title_position = (23, 50) # 위치
-    title_font = ImageFont.truetype(title_font_path, title_font_size)
+    title_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 20, (23, 50))
 
     # "Prees anykey to play" 폰트 설정
-    press_font_path = os.path.expanduser("~/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf")
-    press_font_size = 15
-    press_position = ((40, 160)) # 위치
-    press_font = ImageFont.truetype(press_font_path, press_font_size)
+    press_text = Font("~/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf", 15, (40, 160))
 
     # 점수 폰트 설정
-    score_font_path = os.path.expanduser("~/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf")
-    score_font_size = 15
-    score_position = ((23, 30)) # 위치
-    score_font = ImageFont.truetype(score_font_path, score_font_size)
+    score_text = Font("~/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf", 15, (23, 30))
 
     # 시작 화면 구성
     while True:
@@ -45,8 +37,8 @@ def main():
             time.sleep(0.5) # 누른 키가 게임에 적용되지 않도록 잠시 멈춤
             break
         my_draw.rectangle((0, 0, joystick.width, joystick.height), fill = (0, 0, 0, 100)) # 시작 화면
-        my_draw.text(title_position, "The   Limit   Of   Speed", fill = "white", font = title_font) # 게임 제목
-        my_draw.text(press_position, "Press  anykey  to  play", fill = "white", font = press_font)
+        my_draw.text(title_text.position, "The   Limit   Of   Speed", fill = "white", font = title_text.font) # 게임 제목
+        my_draw.text(press_text.position, "Press  anykey  to  play", fill = "white", font = press_text.font)
         joystick.disp.image(my_image)
 
     a_time = 0 # a 버튼이 눌린 시간
@@ -91,7 +83,7 @@ def main():
     
         my_draw.rectangle((0, 0, joystick.width, joystick.height), fill = (255, 255, 255, 100))
         my_draw.ellipse(tuple(character.position), outline = character.outline, fill = (0, 0, 0))
-        my_draw.text(score_position, "SCORE: " + score, fill = "blue", font = score_font)
+        my_draw.text(score_text.position, "SCORE: " + score, fill = "blue", font = score_text.font)
 
         #좌표는 동그라미의 왼쪽 위, 오른쪽 아래 점 (x1, y1, x2, y2)
         joystick.disp.image(my_image)
