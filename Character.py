@@ -7,6 +7,7 @@ class Character:
         self.appearance = 'astrounaut'
         self.image = Image.open(path).resize((20, 20))
         self.state = None
+        self.disp_size = (width, height)
         self.position = np.array([width / 2 - 10, height / 2 - 10, width / 2 + 10, height / 2 + 10])
         #self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
         self.outline = "#FFFFFF"
@@ -24,21 +25,25 @@ class Character:
             self.outline = "#FF0000" # 이동 -> 테두리 빨강
 
             if command['up_pressed']:
-                self.position[1] -= self.speed
-                self.position[3] -= self.speed
+                if self.position[1] - self.speed >= 0: # 화면 밖으로 나가지 않도록 설정 (위로 못나가도록)
+                    self.position[1] -= self.speed
+                    self.position[3] -= self.speed
 
             if command['down_pressed']:
-                self.position[1] += self.speed
-                self.position[3] += self.speed
+                if self.position[3] + self.speed <= self.disp_size[1]: # 화면 밖으로 나가지 않도록 설정 (아래로 못나가도록)
+                    self.position[1] += self.speed
+                    self.position[3] += self.speed
 
             if command['left_pressed']:
-                self.position[0] -= self.speed
-                self.position[2] -= self.speed
+                if self.position[0] - self.speed >= 0: # 화면 밖으로 나가지 않도록 설정 (왼쪽으로 못나가도록)
+                    self.position[0] -= self.speed
+                    self.position[2] -= self.speed
                 
             if command['right_pressed']:
-                self.position[0] += self.speed
-                self.position[2] += self.speed
-
+                if  self.position[2] + self.speed <= self.disp_size[1]: # 화면 밖으로 나가지 않도록 설정 (오른쪽으로 못나가도록)
+                    self.position[0] += self.speed
+                    self.position[2] += self.speed
+# if self.position[0] - self.speed >= 0 and self.position[0] + self.sp <= self.disp_size[0] and self.position[1] >= 0 and self.position[1] <= self.disp_size[1]:
         #self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
 
     def a_pressed_check(self, a_time, cur_time):
