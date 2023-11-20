@@ -1,12 +1,14 @@
 import numpy as np
 import time
+from PIL import Image, ImageDraw, ImageFont
 
 class Character:
-    def __init__(self, width, height):
-        self.appearance = 'circle'
+    def __init__(self, width, height, path):
+        self.appearance = 'astrounaut'
+        self.image = Image.open(path).resize((20, 20))
         self.state = None
-        self.position = np.array([width/2 - 20, height/2 - 20, width/2 + 20, height/2 + 20])
-        self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
+        self.position = np.array([width / 2 - 10, height / 2 - 10, width / 2 + 10, height / 2 + 10])
+        #self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
         self.outline = "#FFFFFF"
         self.speed = 5 # 캐릭터 속도 기본 값
         self.energy = 3 # 캐릭터 에너지
@@ -37,7 +39,7 @@ class Character:
                 self.position[0] += self.speed
                 self.position[2] += self.speed
 
-        self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
+        #self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
 
     def a_pressed_check(self, a_time, cur_time):
         if cur_time - a_time < 3:

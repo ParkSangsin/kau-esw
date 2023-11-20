@@ -19,16 +19,19 @@ def main():
     # my_image에 그릴 도구 my_draw 생성
     my_draw = ImageDraw.Draw(my_image)
 
-    character = Character(joystick.width, joystick.height) # 캐릭터 객체 생성
-    
+    character = Character(joystick.width, joystick.height, "/home/kau-esw/esw/TA-ESW/game/png/astronaut.png") # 캐릭터 객체 생성
+
     # 시작화면 타이틀 텍스트 폰트 설정
     title_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 20, (23, 50))
 
     # "Prees anykey to play" 폰트 설정
     press_text = Font("~/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf", 15, (40, 160))
 
-    # 점수 폰트 설정
-    score_text = Font("~/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf", 15, (23, 30))
+    # 점수 표시 텍스트 폰트 설정
+    score_text = Font("~/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf", 15, (23, 20))
+
+    # 에너지 표시 텍스트 폰트 설정
+    energy_text = Font("~/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf", 15, (153, 20))
 
     # 시작 화면 구성
     while True:
@@ -73,7 +76,6 @@ def main():
             if character.energy_check():
                 character.energy -= 1
                 a_time = time.time()
-            print(character.energy)
         
         # a버튼이 눌렸는지 계속해서 체크
         a_flag = character.a_pressed_check(a_time, cur_time)
@@ -81,13 +83,14 @@ def main():
         # 캐릭터 이동
         character.move(command)
     
-        my_draw.rectangle((0, 0, joystick.width, joystick.height), fill = (255, 255, 255, 100))
-        my_draw.ellipse(tuple(character.position), outline = character.outline, fill = (0, 0, 0))
-        my_draw.text(score_text.position, "SCORE: " + score, fill = "blue", font = score_text.font)
+        background_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/background.jpg").resize((joystick.width, joystick.height))
+        draw = ImageDraw.Draw(background_image) # background_image와 draw 연동 (back_ground위에 그릴 도구)
+        draw.text(score_text.position, "SCORE: " + score, fill = "blue", font = score_text.font) # background_image 위에 점수 그리기
+        draw.text(energy_text.position, "ENERGY: " + str(character.energy), fill = "green", font = energy_text.font) # background_image 위에 남은 에너지 그리기
+        background_image.paste(character.image, tuple(map(int, character.position)), character.image) # 캐릭터 그리기 (맨 위에 그리기 -> 캐릭터가 가리지 않도록)
 
-        #좌표는 동그라미의 왼쪽 위, 오른쪽 아래 점 (x1, y1, x2, y2)
-        joystick.disp.image(my_image)
-    
+        joystick.disp.image(background_image)
+
     end_time = time.time()
 
 if __name__ == '__main__':
