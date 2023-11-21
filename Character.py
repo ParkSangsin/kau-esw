@@ -5,10 +5,10 @@ from PIL import Image, ImageDraw, ImageFont
 class Character:
     def __init__(self, width, height, path):
         self.appearance = 'astrounaut'
-        self.image = Image.open(path).resize((20, 20))
+        self.image = Image.open(path).resize((30, 30))
         self.state = None
         self.disp_size = (width, height)
-        self.position = np.array([width / 2 - 10, height / 2 - 10, width / 2 + 10, height / 2 + 10])
+        self.position = np.array([width / 2 - 15, height / 2 - 15, width / 2 + 15, height / 2 + 15])
         #self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
         self.outline = "#FFFFFF"
         self.speed = 5 # 캐릭터 속도 기본 값

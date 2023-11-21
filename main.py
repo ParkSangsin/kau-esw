@@ -10,6 +10,7 @@ import numpy as np
 from Character import Character
 from Joystick import Joystick
 from Font import Font
+from Object import Object
 
 def main():
     # 조이스틱 객체 생성
@@ -33,6 +34,9 @@ def main():
     # 에너지 표시 텍스트 폰트 설정
     energy_text = Font("~/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf", 15, (153, 20))
 
+    # 목숨 표시 텍스트 폰트 설정 (후에 하트 사진으로 변경)
+    life_text = Font("~/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf", 15, (153, 50))
+
     # 시작 화면 구성
     while True:
         # 아무 키를 누르면 게임 시작
@@ -47,12 +51,19 @@ def main():
     a_time = 0 # a 버튼이 눌린 시간
     a_flag = True # A 버튼이 여러번 눌리지 않도록 현재 상태 체크
 
+    objects = [] # 장애물 객체를 저장하는 배열
+
     start_time = time.time() # 게임 시작 시간
 
     while True:
         cur_time = time.time() # 현재 시간
         score = "{:.1f}".format(cur_time - start_time) # 게임 진행 시간 = 점수 (소수점 첫째자리까지)
         
+        # object가 나올 확률 조정
+        rand_gen = random.randint(1, 10)
+        if rand_gen == 1: 
+            objects.append(Object())
+
         command = {'move': False, 'up_pressed': False , 'down_pressed': False, 'left_pressed': False, 'right_pressed': False}
     
         if not joystick.button_U.value:  # up pressed
@@ -76,9 +87,14 @@ def main():
             if character.energy_check():
                 character.energy -= 1
                 a_time = time.time()
+                print(character.energy)
         
         # a버튼이 눌렸는지 계속해서 체크
         a_flag = character.a_pressed_check(a_time, cur_time)
+
+        for object in objects:
+            object.collision_check(character)
+            object.move()
 
         # 캐릭터 이동
         character.move(command)
@@ -87,7 +103,12 @@ def main():
         draw = ImageDraw.Draw(background_image) # background_image와 draw 연동 (back_ground위에 그릴 도구)
         draw.text(score_text.position, "SCORE: " + score, fill = "blue", font = score_text.font) # background_image 위에 점수 그리기
         draw.text(energy_text.position, "ENERGY: " + str(character.energy), fill = "green", font = energy_text.font) # background_image 위에 남은 에너지 그리기
+        draw.text(life_text.position, "LIFE: " + str(character.life), fill = "red", font = life_text.font) # background_image 위에 남은 에너지 그리기
         background_image.paste(character.image, tuple(map(int, character.position)), character.image) # 캐릭터 그리기 (맨 위에 그리기 -> 캐릭터가 가리지 않도록)
+
+        for object in objects:
+            if object.state != 'hit':
+                draw.ellipse(tuple(object.position), outline = object.outline, fill = (255, 0, 0))
 
         joystick.disp.image(background_image)
 
