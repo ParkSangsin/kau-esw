@@ -60,7 +60,7 @@ def main():
         score = "{:.1f}".format(cur_time - start_time) # 게임 진행 시간 = 점수 (소수점 첫째자리까지)
         
         # object가 나올 확률 조정
-        rand_gen = random.randint(1, 10)
+        rand_gen = random.randint(1, 15)
         if rand_gen == 1: 
             objects.append(Object())
 
@@ -92,9 +92,11 @@ def main():
         # a버튼이 눌렸는지 계속해서 체크
         a_flag = character.a_pressed_check(a_time, cur_time)
 
-        for object in objects:
-            object.collision_check(character)
+        for i, object in enumerate(objects):
             object.move()
+            object.collision_check(character)
+            if object.center[0] < 0 or object.center[0] > joystick.height or object.center[1] < 0 or object.center[1] > joystick.width or object.state == 'hit': # 화면 밖으로 벗어나거나, 캐릭터와 충돌한 객체 삭제
+                objects.pop(i) 
 
         # 캐릭터 이동
         character.move(command)
@@ -108,7 +110,7 @@ def main():
 
         for object in objects:
             if object.state != 'hit':
-                draw.ellipse(tuple(object.position), outline = object.outline, fill = (255, 0, 0))
+                background_image.paste(object.image, tuple(map(int, object.position)), object.image)
 
         joystick.disp.image(background_image)
 
