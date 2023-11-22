@@ -61,4 +61,11 @@ class Character:
             return False
         else:
             return True
+    
+    # 캐릭터가 죽었는지 살았는지를 체크하는 함수 (죽었으면 True 반환)
+    def life_check(self):
+        if self.life <= 0:
+            return True
+        else:
+            return False
             
