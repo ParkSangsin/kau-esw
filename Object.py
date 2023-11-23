@@ -6,11 +6,14 @@ class Object:
     def __init__(self):
         self.direction = {'up' : False, 'down' : False, 'left' : False, 'right' : False}         
         self.position = np.array([])
-        self.speed = 1
-        self.size = random.randint(10, 30)
+        self.size = random.randint(10, 35)
         self.state = None
         self.image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/meteor1.png").resize((self.size, self.size))
 
+        # 랜덤으로 속도 선택
+        self.speed = random.randint(1, 5)
+
+        # 랜덤으로 이미지 선택
         self.rand_image = random.randint(1, 5)
         if self.rand_image == 1:
             self.image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/meteor1.png").resize((self.size, self.size))
@@ -70,7 +73,7 @@ class Object:
 
     # object의 위치와 other의 위치가 겹치면 True 반환
     def overlap(self, ego, other):
-        if ego[0] <= other[2] and ego[1] <= other[3] and ego[2] >= other[0] and ego[3] >= other[1]: # 좌우 충돌
+        if ego[0] + 5 <= other[2] and ego[1] + 5 <= other[3] - 5 and ego[2] - 5 >= other[0] and ego[3] - 5 >= other[1]: # 오차를 줄이기 위해 충돌 조건 완화
             return True
         else:
             return False

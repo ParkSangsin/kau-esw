@@ -67,7 +67,7 @@ def main():
         score = "{:.1f}".format(cur_time - start_time) # 게임 진행 시간 = 점수 (소수점 첫째자리까지)
         
         # object가 나올 확률 조정
-        rand_gen = random.randint(1, 15)
+        rand_gen = random.randint(1, 7)
         if rand_gen == 1: 
             objects.append(Object())
 
