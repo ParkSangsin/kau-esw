@@ -11,6 +11,7 @@ from Character import Character
 from Joystick import Joystick
 from Font import Font
 from Object import Object
+from Item import Item
 
 def main():
     # 조이스틱 객체 생성
@@ -59,16 +60,21 @@ def main():
     a_flag = True # A 버튼이 여러번 눌리지 않도록 현재 상태 체크
 
     objects = [] # 장애물 객체를 저장하는 배열
-
+    items = []
     start_time = time.time() # 게임 시작 시간
 
     while True:
         cur_time = time.time() # 현재 시간
         score = "{:.1f}".format(cur_time - start_time) # 게임 진행 시간 = 점수 (소수점 첫째자리까지)
         
+        # item이 나올 확률 조정
+        rand_item_gen = random.randint(1, 100)
+        if rand_item_gen == 1: 
+            items.append(Item())
+        
         # object가 나올 확률 조정
-        rand_gen = random.randint(1, 7)
-        if rand_gen == 1: 
+        rand_obj_gen = random.randint(1, 12)
+        if rand_obj_gen == 1: 
             objects.append(Object())
 
         command = {'move': False, 'up_pressed': False , 'down_pressed': False, 'left_pressed': False, 'right_pressed': False}
@@ -95,6 +101,8 @@ def main():
                 character.energy -= 1
                 a_time = time.time()
                 print(character.energy)
+
+        # if not joystick.button_B.value and a_flag == True: # A pressed
         
         # a버튼이 눌렸는지 계속해서 체크
         a_flag = character.a_pressed_check(a_time, cur_time)
@@ -104,6 +112,11 @@ def main():
             object.collision_check(character)
             if object.center[0] < 0 or object.center[0] > joystick.height or object.center[1] < 0 or object.center[1] > joystick.width or object.state == 'hit': # 화면 밖으로 벗어나거나, 캐릭터와 충돌한 객체 삭제
                 objects.pop(i) 
+
+        for i, item in enumerate(items):
+            item.collision_check(character)
+            if item.state == 'hit' or item.state == 'used':
+                items.pop(i)
 
         # 현재 캐릭터가 살았는지 죽었는지를 체크
         if character.life_check():
@@ -120,14 +133,14 @@ def main():
         game_image.paste(character.image, tuple(map(int, character.position)), character.image) # 캐릭터 그리기 (맨 위에 그리기 -> 캐릭터가 가리지 않도록)
 
         for object in objects:
-            if object.state != 'hit':
-                game_image.paste(object.image, tuple(map(int, object.position)), object.image)
+            game_image.paste(object.image, tuple(map(int, object.position)), object.image)
+
+        for item in items:
+            game_image.paste(item.image, tuple(map(int, item.position)), item.image)
 
         joystick.disp.image(game_image)
 
     end_time = "{:.1f}".format(time.time() - start_time) # 종료시간
-
-    print(end_time)
 
     # 종료 화면 구성
 
