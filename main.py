@@ -25,26 +25,14 @@ def main():
 
     character = Character(joystick.width, joystick.height) # 캐릭터 객체 생성
 
-    # 시작화면 타이틀 텍스트 폰트 설정
-    title_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 20, (23, 20))
-
-    # 종료화면 텍스트 폰트 설정
-    end_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 20, (15, 10))
-
-    # 종료화면 점수 표시 텍스트 설정
-    end_score = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (145, 80))
-
-    # "Prees anykey to play" 폰트 설정
-    press_text = Font("/home/kau-esw/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf", 18, (30, 180))
-
-    # 점수 표시 텍스트 폰트 설정
-    score_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (5, 5))
-
-    # 에너지 표시 텍스트 폰트 설정
-    energy_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (163, 5))
-
-    # 목숨 표시 텍스트 폰트 설정 (후에 하트 사진으로 변경)
-    life_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (163, 25))
+    # 폰트 설정
+    title_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 20, (23, 20)) # 시작화면 타이틀 텍스트 폰트 설정
+    end_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 20, (15, 10)) # 종료화면 텍스트 폰트 설정
+    end_score = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (145, 80)) # 종료화면 점수 표시 텍스트 설정
+    press_text = Font("/home/kau-esw/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf", 18, (30, 180)) # "Prees anykey to play" 폰트 설정
+    score_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (5, 5)) # 점수 표시 텍스트 폰트 설정
+    energy_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (163, 5)) # 에너지 표시 텍스트 폰트 설정
+    life_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (163, 25)) # 목숨 표시 텍스트 폰트 설정 (후에 하트 사진으로 변경)
 
     # 시작 화면 구성
     while True:
@@ -56,6 +44,9 @@ def main():
         start_draw.text(press_text.position, "Press  anykey  to  play", fill = "blue", font = press_text.font)
         joystick.disp.image(start_image)
 
+    stage_num = 11
+    stage = 0
+
     a_time = 0 # a 버튼이 눌린 시간
     a_flag = True # A 버튼이 여러번 눌리지 않도록 현재 상태 체크
 
@@ -66,17 +57,22 @@ def main():
     objects = [] # 장애물 객체를 저장하는 배열
     items = []
     start_time = time.time() # 게임 시작 시간
+
     while True:
         cur_time = time.time() # 현재 시간
         score = "{:.1f}".format(cur_time - start_time) # 게임 진행 시간 = 점수 (소수점 첫째자리까지)
         
         # item이 나올 확률 조정
-        rand_item_gen = random.randint(1, 100)
+        rand_item_gen = random.randint(1, 200)
         if rand_item_gen == 1: 
             items.append(Item())
         
         # object가 나올 확률 조정
-        rand_obj_gen = random.randint(1, 12)
+        if float(score) % 10.0 == 0 and stage <= 7:
+            stage_num -= 1
+            stage += 1
+            print(stage, stage_num)
+        rand_obj_gen = random.randint(1, stage_num)
         if rand_obj_gen == 1: 
             objects.append(Object())
 
@@ -110,7 +106,7 @@ def main():
         a_flag = character.a_pressed_check(a_time, cur_time)
 
         # 충돌 이펙트 구현
-        if a_flag: # 평상시에만 충돌 체크
+        if a_flag or collision_flag: # 평상시에만 충돌 체크
             collision_flag = character.collision_check(collision_time, cur_time)
         if collision_flag: # 충돌 후 2초가 지나면 True로 고정
             collision_effect = True
@@ -123,12 +119,12 @@ def main():
         for i, object in enumerate(objects):
             object.move()
             # 에너지가 사용되지 않는 동안만 충돌체크
-            object.collision_check(character, a_flag)
-            if object.state == 'hit':
+            object.collision_check(character, a_flag, collision_flag)
+            if object.state == 'hit' and collision_flag:
                 if a_flag:
                     collision_time = time.time()
                 objects.pop(i)
-            if object.center[0] < 0 or object.center[0] > joystick.height or object.center[1] < 0 or object.center[1] > joystick.width: # 화면 밖으로 벗어나거나, 캐릭터와 충돌한 객체 삭제
+            if object.center[0] < 0 or object.center[0] > joystick.height or object.center[1] < 0 or object.center[1] > joystick.width: # 화면 밖으로 벗어난객체 삭제
                 objects.pop(i) 
 
         for i, item in enumerate(items):

@@ -11,7 +11,7 @@ class Object:
         self.image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/meteor1.png").resize((self.size, self.size))
 
         # 랜덤으로 속도 선택
-        self.speed = random.randint(1, 5)
+        self.speed = random.randint(1, 7)
 
         # 랜덤으로 이미지 선택
         self.rand_image = random.randint(1, 5)
@@ -64,10 +64,10 @@ class Object:
         self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2]) # center 갱신
     
     # 캐릭터와 충돌했는지를 체크
-    def collision_check(self, character, a_flag):
+    def collision_check(self, character, a_flag, collision_flag):
         collision = self.overlap(self.position, character.position)
-        if collision:
-            if a_flag: # energy를 사용했을 시에는 life 변화 X
+        if collision and collision_flag:
+            if a_flag: # energy를 사용 or 직전에 충돌했을 경우 life 변화 X
                 character.life -= 1
             self.state = 'hit'
 
