@@ -10,16 +10,13 @@ class Item:
         self.name = ""
 
         # 랜덤으로 이미지 선택
-        self.rand_image = random.randint(1, 3)
+        self.rand_image = random.randint(1, 2)
         if self.rand_image == 1:
             self.image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/aid-kit.png").resize((self.size, self.size))
             self.name = "life"
         elif self.rand_image == 2:
             self.image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/energy.png").resize((self.size, self.size))
             self.name = "energy"
-        elif self.rand_image == 3:
-            self.image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/superpower.png").resize((self.size, self.size))
-            self.name = "superpower"
 
         # 아이템 위치를 무작위로 생성 (위치에 따라 방향 변화)
         self.rand_x = random.randint(0, 240 - self.size)

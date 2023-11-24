@@ -110,7 +110,8 @@ def main():
         a_flag = character.a_pressed_check(a_time, cur_time)
 
         # 충돌 이펙트 구현
-        collision_flag = character.collision_check(collision_time, cur_time)
+        if a_flag: # 평상시에만 충돌 체크
+            collision_flag = character.collision_check(collision_time, cur_time)
         if collision_flag: # 충돌 후 2초가 지나면 True로 고정
             collision_effect = True
         else: # 충돌 후 2초 간 이펙트 생성
@@ -122,10 +123,10 @@ def main():
         for i, object in enumerate(objects):
             object.move()
             # 에너지가 사용되지 않는 동안만 충돌체크
-            if a_flag:
-                object.collision_check(character)
+            object.collision_check(character, a_flag)
             if object.state == 'hit':
-                collision_time = time.time()
+                if a_flag:
+                    collision_time = time.time()
                 objects.pop(i)
             if object.center[0] < 0 or object.center[0] > joystick.height or object.center[1] < 0 or object.center[1] > joystick.width: # 화면 밖으로 벗어나거나, 캐릭터와 충돌한 객체 삭제
                 objects.pop(i) 

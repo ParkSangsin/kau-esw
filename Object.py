@@ -64,11 +64,11 @@ class Object:
         self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2]) # center 갱신
     
     # 캐릭터와 충돌했는지를 체크
-    def collision_check(self, character):
+    def collision_check(self, character, a_flag):
         collision = self.overlap(self.position, character.position)
-            
         if collision:
-            character.life -= 1
+            if a_flag: # energy를 사용했을 시에는 life 변화 X
+                character.life -= 1
             self.state = 'hit'
 
     # object의 위치와 other의 위치가 겹치면 True 반환
