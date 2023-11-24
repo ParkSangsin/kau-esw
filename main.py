@@ -23,7 +23,7 @@ def main():
     # start_image에 그릴 도구 start_draw 생성
     start_draw = ImageDraw.Draw(start_image)
 
-    character = Character(joystick.width, joystick.height, "/home/kau-esw/esw/TA-ESW/game/png/astronaut.png") # 캐릭터 객체 생성
+    character = Character(joystick.width, joystick.height) # 캐릭터 객체 생성
 
     # 시작화면 타이틀 텍스트 폰트 설정
     title_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 20, (23, 20))
@@ -59,10 +59,13 @@ def main():
     a_time = 0 # a 버튼이 눌린 시간
     a_flag = True # A 버튼이 여러번 눌리지 않도록 현재 상태 체크
 
+    collision_time = 0 # 충돌 시간
+    collision_effect = True # 충돌 effect 구현
+    collision_flag = True
+
     objects = [] # 장애물 객체를 저장하는 배열
     items = []
     start_time = time.time() # 게임 시작 시간
-
     while True:
         cur_time = time.time() # 현재 시간
         score = "{:.1f}".format(cur_time - start_time) # 게임 진행 시간 = 점수 (소수점 첫째자리까지)
@@ -100,17 +103,31 @@ def main():
             if character.energy_check():
                 character.energy -= 1
                 a_time = time.time()
-                print(character.energy)
 
         # if not joystick.button_B.value and a_flag == True: # A pressed
         
-        # a버튼이 눌렸는지 계속해서 체크
+        # a버튼이 눌렸는지 계속해서 체크 (중복 누름 방지)
         a_flag = character.a_pressed_check(a_time, cur_time)
+
+        # 충돌 이펙트 구현
+        collision_flag = character.collision_check(collision_time, cur_time)
+        if collision_flag: # 충돌 후 2초가 지나면 True로 고정
+            collision_effect = True
+        else: # 충돌 후 2초 간 이펙트 생성
+            if collision_effect == True:
+                collision_effect = False
+            else:
+                collision_effect = True
 
         for i, object in enumerate(objects):
             object.move()
-            object.collision_check(character)
-            if object.center[0] < 0 or object.center[0] > joystick.height or object.center[1] < 0 or object.center[1] > joystick.width or object.state == 'hit': # 화면 밖으로 벗어나거나, 캐릭터와 충돌한 객체 삭제
+            # 에너지가 사용되지 않는 동안만 충돌체크
+            if a_flag:
+                object.collision_check(character)
+            if object.state == 'hit':
+                collision_time = time.time()
+                objects.pop(i)
+            if object.center[0] < 0 or object.center[0] > joystick.height or object.center[1] < 0 or object.center[1] > joystick.width: # 화면 밖으로 벗어나거나, 캐릭터와 충돌한 객체 삭제
                 objects.pop(i) 
 
         for i, item in enumerate(items):
@@ -130,13 +147,19 @@ def main():
         game_draw.text(score_text.position, "SCORE: " + score, fill = "blue", font = score_text.font) # game_image 위에 점수 그리기
         game_draw.text(energy_text.position, "ENERGY: " + str(character.energy), fill = "green", font = energy_text.font) # game_image 위에 남은 에너지 그리기
         game_draw.text(life_text.position, "LIFE: " + str(character.life), fill = "red", font = life_text.font) # game_image 위에 남은 에너지 그리기
-        game_image.paste(character.image, tuple(map(int, character.position)), character.image) # 캐릭터 그리기 (맨 위에 그리기 -> 캐릭터가 가리지 않도록)
 
         for object in objects:
             game_image.paste(object.image, tuple(map(int, object.position)), object.image)
 
         for item in items:
             game_image.paste(item.image, tuple(map(int, item.position)), item.image)
+
+        if collision_effect:
+            if a_flag:
+                game_image.paste(character.image, tuple(map(int, character.position)), character.image) # 캐릭터 그리기 (맨 위에 그리기 -> 캐릭터가 가리지 않도록)
+            else:
+                game_image.paste(character.superimage, tuple(map(int, character.position)), character.superimage) # 에너지 사용시 사진 변경
+            
 
         joystick.disp.image(game_image)
 

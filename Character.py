@@ -3,9 +3,10 @@ import time
 from PIL import Image, ImageDraw, ImageFont
 
 class Character:
-    def __init__(self, width, height, path):
+    def __init__(self, width, height):
         self.appearance = 'astrounaut'
-        self.image = Image.open(path).resize((30, 30))
+        self.image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/astronaut.png").resize((30, 30))
+        self.superimage = Image.open("/home/kau-esw/esw/TA-ESW/game/png/superhero.png").resize((30, 30))
         self.state = None
         self.disp_size = (width, height)
         self.position = np.array([width / 2 - 15, height / 2 - 15, width / 2 + 15, height / 2 + 15])
@@ -14,6 +15,7 @@ class Character:
         self.speed = 5 # 캐릭터 속도 기본 값
         self.energy = 3 # 캐릭터 에너지
         self.life = 3 # 캐릭터 목숨
+        self.collision_effect = True
 
     def move(self, command = None):
         if command['move'] == False:
@@ -47,13 +49,18 @@ class Character:
         #self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
 
     def a_pressed_check(self, a_time, cur_time):
-        if cur_time - a_time < 3:
+        if cur_time - a_time < 2: # 2초 동안
             self.speed = 10 
             return False # A 버튼을 누를 수 없는 상태 (speed가 10인 상태) 이면 False
         else:
             self.speed = 5
             return True # A 버튼을 누를 수 있는 상태 (speed가 5인 상태) 이면 True
-
+    
+    def collision_check(self, collision_time, cur_time):
+        if cur_time - collision_time < 1: # 1초 동안
+            return False 
+        else:
+            return True #
 
     # 에너지를 사용할 수 있는지 체크하는 함수 
     def energy_check(self):
