@@ -13,7 +13,10 @@ from Font import Font
 from Object import Object
 from Item import Item
 
+score_list = ['0.0'] * 6
+
 def main():
+    global score_list
     # 조이스틱 객체 생성
     joystick = Joystick()
 
@@ -26,13 +29,17 @@ def main():
     character = Character(joystick.width, joystick.height) # 캐릭터 객체 생성
 
     # 폰트 설정
-    title_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 20, (23, 20)) # 시작화면 타이틀 텍스트 폰트 설정
+    title_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 20, (23, 10)) # 시작화면 타이틀 텍스트 폰트 설정
     end_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 20, (15, 10)) # 종료화면 텍스트 폰트 설정
     end_score = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (145, 80)) # 종료화면 점수 표시 텍스트 설정
-    press_text = Font("/home/kau-esw/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf", 18, (30, 180)) # "Prees anykey to play" 폰트 설정
+    press_text = Font("/home/kau-esw/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf", 18, (30, 150)) # "Prees anykey to play" 폰트 설정
     score_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (5, 5)) # 점수 표시 텍스트 폰트 설정
     energy_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (163, 5)) # 에너지 표시 텍스트 폰트 설정
     life_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (163, 25)) # 목숨 표시 텍스트 폰트 설정 (후에 하트 사진으로 변경)
+
+    start_draw.text(title_text.position, "The   Draft   in   Space", fill = "gray", font = title_text.font) # 게임 제목
+    start_draw.text(press_text.position, "Press  anykey  to  play", fill = "red", font = press_text.font)
+    joystick.disp.image(start_image)
 
     # 시작 화면 구성
     while True:
@@ -40,9 +47,7 @@ def main():
         if not joystick.button_U.value or not joystick.button_D.value or not joystick.button_L.value or not joystick.button_R.value or not joystick.button_A.value or not joystick.button_B.value:
             time.sleep(0.5) # 누른 키가 게임에 적용되지 않도록 잠시 멈춤
             break
-        start_draw.text(title_text.position, "The   Draft   in   Space", fill = "red", font = title_text.font) # 게임 제목
-        start_draw.text(press_text.position, "Press  anykey  to  play", fill = "blue", font = press_text.font)
-        joystick.disp.image(start_image)
+        
 
     stage_num = 11
     stage = 0
@@ -63,12 +68,12 @@ def main():
         score = "{:.1f}".format(cur_time - start_time) # 게임 진행 시간 = 점수 (소수점 첫째자리까지)
         
         # item이 나올 확률 조정
-        rand_item_gen = random.randint(1, 200)
+        rand_item_gen = random.randint(1, 250)
         if rand_item_gen == 1: 
             items.append(Item())
         
         # object가 나올 확률 조정
-        if float(score) % 10.0 == 0 and stage <= 7:
+        if float(score) % 10.0 == 0 and stage <= 6:
             stage_num -= 1
             stage += 1
             print(stage, stage_num)
@@ -161,13 +166,15 @@ def main():
         joystick.disp.image(game_image)
 
     end_time = "{:.1f}".format(time.time() - start_time) # 종료시간
+    score_list.append(end_time) # 점수판에 이번 게임의 점수 삽입
+    score_list = sorted(score_list, reverse=True) # 점수판 내용을 내림차순 정렬
 
     # 종료 화면 구성
 
     # joystick width, height에 맞는 종료화면 이미지 생성
     end_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/endimage.png").resize((joystick.width, joystick.height))
 
-    # end_image에 그릴 도구 my_draw 생성
+    # end_image에 그릴 도구 end_draw 생성
     end_draw = ImageDraw.Draw(end_image)
 
     end_draw.text(end_text.position, "You   Dead", fill = "red", font = end_text.font)
@@ -179,10 +186,54 @@ def main():
     time.sleep(1)
     
     while True:
-        # 아무 키를 누르면 다시 게임 시작
+        # 아무 키를 누르면 점수판 화면으로 이동
         if not joystick.button_U.value or not joystick.button_D.value or not joystick.button_L.value or not joystick.button_R.value or not joystick.button_A.value or not joystick.button_B.value:
-            time.sleep(0.5) # 누른 키가 시작화면에 적용되지 않도록 잠시 멈춤
+            time.sleep(0.5) # 누른 키가 점수판 화면에 적용되지 않도록 잠시 멈춤
             break
+    
+    # 점수판 화면 구성
+
+    # joystick width, height에 맞는 점수판 화면 이미지 생성
+    score_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/game.jpg").resize((joystick.width, joystick.height))
+
+    # score_image에 그릴 도구 score_draw 생성
+    score_draw = ImageDraw.Draw(score_image)
+
+    #score_draw.text(end_text.position, "You   Dead", fill = "red", font = end_text.font)
+    #end_draw.text(end_score.position, "SCORE: " + score, fill = "red", font = end_score.font)
+
+    score_image_text = Font("/home/kau-esw/esw/TA-ESW/game/font/Roboto-Black.ttf", 30, (40, 20))
+    score_draw.text(score_image_text.position, "S  C  O  R  E", fill = "yellow", font = score_image_text.font)
+
+    if score_list[0] == end_time:
+        best_score_text = Font("/home/kau-esw/esw/TA-ESW/game/font/Roboto-Black.ttf", 25, (30, 70))
+        score_draw.text(best_score_text.position, f"Best Score!  {score_list[0]}", fill = "red", font = best_score_text.font)
+
+    score_left_start_position = [20, 110]
+    for i, string in enumerate(score_list[0:3]):
+        string_score_text = Font("/home/kau-esw/esw/TA-ESW/game/font/Roboto-Black.ttf", 20, score_left_start_position)
+        score_draw.text(string_score_text.position, f"{i+1})  {string}", fill = "blue", font = string_score_text.font)
+        if string == end_time:
+            score_draw.text(string_score_text.position, f"{i+1})  {string}", fill = "red", font = string_score_text.font)
+        score_left_start_position[1] += 40
+    
+    score_right_start_position = [130, 110]
+    for i, string in enumerate(score_list[3:6]):
+        string_score_text = Font("/home/kau-esw/esw/TA-ESW/game/font/Roboto-Black.ttf", 20, score_right_start_position) 
+        score_draw.text(string_score_text.position, f"{i+4})  {string}", fill = "blue", font = string_score_text.font)
+        if string == end_time:
+            score_draw.text(string_score_text.position, f"{i+1})  {string}", fill = "red", font = string_score_text.font)
+        score_right_start_position[1] += 40
+
+    joystick.disp.image(score_image)
+
+    while True:
+        # 아무 키를 누르면 다시 시작 화면으로 이동
+        if not joystick.button_U.value or not joystick.button_D.value or not joystick.button_L.value or not joystick.button_R.value or not joystick.button_A.value or not joystick.button_B.value:
+            time.sleep(0.5) # 누른 키가 점수판 화면에 적용되지 않도록 잠시 멈춤
+            break
+
+    
 
 if __name__ == '__main__':
     while True:
