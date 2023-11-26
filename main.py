@@ -68,7 +68,7 @@ def main():
         score = "{:.1f}".format(cur_time - start_time) # 게임 진행 시간 = 점수 (소수점 첫째자리까지)
         
         # item이 나올 확률 조정
-        rand_item_gen = random.randint(1, 250)
+        rand_item_gen = random.randint(1, 275)
         if rand_item_gen == 1: 
             items.append(Item())
         
@@ -167,8 +167,9 @@ def main():
 
     end_time = "{:.1f}".format(time.time() - start_time) # 종료시간
     score_list.append(end_time) # 점수판에 이번 게임의 점수 삽입
+    score_list = list(map(float, score_list)) # 점수판 내용을 실수 변환 후
     score_list = sorted(score_list, reverse=True) # 점수판 내용을 내림차순 정렬
-
+    score_list = list(map(str, score_list)) # 점수판 내용을 다시 문자열로 변환
     # 종료 화면 구성
 
     # joystick width, height에 맞는 종료화면 이미지 생성
@@ -206,8 +207,8 @@ def main():
     score_draw.text(score_image_text.position, "S  C  O  R  E", fill = "yellow", font = score_image_text.font)
 
     if score_list[0] == end_time:
-        best_score_text = Font("/home/kau-esw/esw/TA-ESW/game/font/Roboto-Black.ttf", 25, (30, 70))
-        score_draw.text(best_score_text.position, f"Best Score!  {score_list[0]}", fill = "red", font = best_score_text.font)
+        best_score_text = Font("/home/kau-esw/esw/TA-ESW/game/font/Roboto-Black.ttf", 25, (55, 70))
+        score_draw.text(best_score_text.position, f"Best Score !", fill = "red", font = best_score_text.font)
 
     score_left_start_position = [20, 110]
     for i, string in enumerate(score_list[0:3]):
