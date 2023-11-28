@@ -12,8 +12,12 @@ from Joystick import Joystick
 from Font import Font
 from Object import Object
 from Item import Item
+#import pygame 
+
+#pygame.init() # Pygame 초기화
 
 score_list = ['0.0'] * 6
+
 
 def main():
     global score_list
@@ -36,6 +40,7 @@ def main():
     score_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (5, 5)) # 점수 표시 텍스트 폰트 설정
     energy_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (163, 5)) # 에너지 표시 텍스트 폰트 설정
     life_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (163, 25)) # 목숨 표시 텍스트 폰트 설정 (후에 하트 사진으로 변경)
+    stage_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (95, 5))
 
     start_draw.text(title_text.position, "The   Draft   in   Space", fill = "gray", font = title_text.font) # 게임 제목
     start_draw.text(press_text.position, "Press  anykey  to  play", fill = "red", font = press_text.font)
@@ -50,7 +55,8 @@ def main():
         
 
     stage_num = 11
-    stage = 0
+    stage = 0  
+    stage_flag = True
 
     a_time = 0 # a 버튼이 눌린 시간
     a_flag = True # A 버튼이 여러번 눌리지 않도록 현재 상태 체크
@@ -73,10 +79,13 @@ def main():
             items.append(Item())
         
         # object가 나올 확률 조정
-        if float(score) % 10.0 == 0 and stage <= 6:
+        if float(score) % 10.0 == 0 and stage <= 6 and stage_flag:
+            stage_flag = False
             stage_num -= 1
             stage += 1
-            print(stage, stage_num)
+        else:
+            stage_flag = True
+
         rand_obj_gen = random.randint(1, stage_num)
         if rand_obj_gen == 1: 
             objects.append(Object())
@@ -149,6 +158,7 @@ def main():
         game_draw.text(score_text.position, "SCORE: " + score, fill = "blue", font = score_text.font) # game_image 위에 점수 그리기
         game_draw.text(energy_text.position, "ENERGY: " + str(character.energy), fill = "green", font = energy_text.font) # game_image 위에 남은 에너지 그리기
         game_draw.text(life_text.position, "LIFE: " + str(character.life), fill = "red", font = life_text.font) # game_image 위에 남은 에너지 그리기
+        game_draw.text(stage_text.position, "Stage  " + str(stage), fill = "yellow", font = stage_text.font)
 
         for object in objects:
             game_image.paste(object.image, tuple(map(int, object.position)), object.image)
