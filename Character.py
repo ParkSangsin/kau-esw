@@ -11,7 +11,6 @@ class Character:
         self.disp_size = (width, height)
         self.position = np.array([width / 2 - 15, height / 2 - 15, width / 2 + 15, height / 2 + 15])
         #self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
-        self.outline = "#FFFFFF"
         self.speed = 5 # 캐릭터 속도 기본 값
         self.energy = 2 # 캐릭터 에너지
         self.life = 100 # 캐릭터 목숨
@@ -20,11 +19,9 @@ class Character:
     def move(self, command = None):
         if command['move'] == False:
             self.state = None
-            self.outline = "#FFFFFF" # 정지 -> 테두리 검정
         
         else:
             self.state = 'move'
-            self.outline = "#FF0000" # 이동 -> 테두리 빨강
 
             if command['up_pressed']:
                 if self.position[1] - self.speed >= 0: # 화면 밖으로 나가지 않도록 설정 (위로 못나가도록)
@@ -75,4 +72,9 @@ class Character:
             return True
         else:
             return False
+        
+    def reset(self):
+        self.position = np.array([self.disp_size[0] / 2 - 15, self.disp_size[1] / 2 - 15, self.disp_size[0] / 2 + 15, self.disp_size[1] / 2 + 15])
+        self.energy = 2 # 캐릭터 에너지
+        self.life = 100 # 캐릭터 목숨
             

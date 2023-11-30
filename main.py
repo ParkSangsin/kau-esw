@@ -26,20 +26,21 @@ def main():
     # start_image에 그릴 도구 start_draw 생성
     start_draw = ImageDraw.Draw(start_image)
 
-    character = Character(joystick.width, joystick.height) # 캐릭터 객체 생성
-
     # 폰트 설정
     title_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 20, (23, 10)) # 시작화면 타이틀 텍스트 폰트 설정
     end_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 20, (15, 10)) # 종료화면 텍스트 폰트 설정
     end_score = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (145, 80)) # 종료화면 점수 표시 텍스트 설정
-    press_text = Font("/home/kau-esw/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf", 18, (30, 150)) # "Prees anykey to play" 폰트 설정
+    press_text = Font("/home/kau-esw/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf", 18, (30, 160)) # "Prees anykey to play" 폰트 설정
     score_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (2, 5)) # 점수 표시 텍스트 폰트 설정
     energy_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (163, 25)) # 에너지 표시 텍스트 폰트 설정
     life_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (170, 5)) # 목숨 표시 텍스트 폰트 설정 (후에 하트 사진으로 변경)
     stage_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (90, 5))
+    pause_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 35, (45, 40))
+    resume_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 30, (30, 110))
+    restart_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 30, (30, 155))
 
-    start_draw.text(title_text.position, "The   Draft   in   Space", fill = "gray", font = title_text.font) # 게임 제목
-    start_draw.text(press_text.position, "Press  anykey  to  play", fill = "red", font = press_text.font)
+    start_draw.text(title_text.position, "The   Draft   in   Space", fill = "white", font = title_text.font) # 게임 제목
+    start_draw.text(press_text.position, "Press  anykey  to  play", fill = "white", font = press_text.font)
     joystick.disp.image(start_image)
 
     # 시작 화면 구성
@@ -64,11 +65,19 @@ def main():
 
     objects = [] # 장애물 객체를 저장하는 배열
     items = []
+
+    character = Character(joystick.width, joystick.height) # 캐릭터 객체 생성
+
+    stop_time = 0 # 멈춘 시간
+
     start_time = time.time() # 게임 시작 시간
 
     while True:
         cur_time = time.time() # 현재 시간
-        score = "{:.1f}".format(cur_time - start_time) # 게임 진행 시간 = 점수 (소수점 첫째자리까지)
+        score = "{:.1f}".format(cur_time - start_time - stop_time) # 게임 진행 시간 = 점수 (소수점 첫째자리까지, 일시정지 시간 제외)
+        
+        game_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/game.jpg").resize((joystick.width, joystick.height))
+        game_draw = ImageDraw.Draw(game_image) # game_image와 draw 연동 (game_image위에 그릴 도구)
         
         # item이 나올 확률 조정
         rand_item_gen = random.randint(1, 300)
@@ -83,35 +92,34 @@ def main():
         else:
             stage_flag = True
 
+        # 무작위 객체 생성
         rand_obj_gen = random.randint(1, stage_num)
         if rand_obj_gen == 1: 
             objects.append(Object())
 
         command = {'move': False, 'up_pressed': False , 'down_pressed': False, 'left_pressed': False, 'right_pressed': False}
     
-        if not joystick.button_U.value:  # up pressed
+        if not joystick.button_U.value:  # ↑ 버튼
             command['up_pressed'] = True
             command['move'] = True
 
-        if not joystick.button_D.value:  # down pressed
+        if not joystick.button_D.value:  # ↓ 버튼
             command['down_pressed'] = True
             command['move'] = True
 
-        if not joystick.button_L.value:  # left pressed
+        if not joystick.button_L.value:  # <- 버튼
             command['left_pressed'] = True
             command['move'] = True
 
-        if not joystick.button_R.value:  # right pressed
+        if not joystick.button_R.value:  # -> 버튼
             command['right_pressed'] = True
             command['move'] = True
 
-        if not joystick.button_A.value and a_flag == True and collision_flag: # A pressed
+        if not joystick.button_A.value and a_flag == True and collision_flag: # A 버튼
             # energy가 0 이상이면, 3초 동안 속도 2배 증가
             if character.energy_check():
                 character.energy -= 1
                 a_time = time.time()
-
-        # if not joystick.button_B.value and a_flag == True: # A pressed
         
         # a버튼이 눌렸는지 계속해서 체크 (중복 누름 방지)
         a_flag = character.a_pressed_check(a_time, cur_time)
@@ -151,8 +159,6 @@ def main():
         # 캐릭터 이동
         character.move(command)
     
-        game_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/game.jpg").resize((joystick.width, joystick.height))
-        game_draw = ImageDraw.Draw(game_image) # game_image와 draw 연동 (game_image위에 그릴 도구)
         game_draw.text(score_text.position, "SCORE: " + score, fill = "blue", font = score_text.font) # game_image 위에 점수 그리기
         game_draw.text(energy_text.position, "ENERGY: " + str(character.energy), fill = "green", font = energy_text.font) # game_image 위에 남은 에너지 그리기
         game_draw.text(life_text.position, "HP: " + str(character.life), fill = "red", font = life_text.font) # game_image 위에 남은 에너지 그리기
@@ -198,7 +204,27 @@ def main():
             else:
                 game_image.paste(character.superimage, tuple(map(int, character.position)), character.superimage) # 에너지 사용시 사진 변경
             
-
+        # 다른 이미지를 그린 후 PAUSE를 그리기 위해 마지막에 체크
+        if not joystick.button_B.value:  # B 버튼
+            check_time = time.time()
+            game_draw.text(pause_text.position, "P  A  U  S  E", fill = "white", font = pause_text.font)
+            game_draw.text(resume_text.position, "A:  R e s u m e ", fill = "white", font = resume_text.font)
+            game_draw.text(restart_text.position, "B:  R e s t a r t", fill = "white", font = restart_text.font)
+            joystick.disp.image(game_image)
+            time.sleep(0.3)
+            while True: 
+                if not joystick.button_A.value: # A 버튼 -> Resume
+                    time.sleep(0.1)
+                    stop_time += time.time() - check_time # 게임 일시정지 -> 시간 흐름 정지 (pause한 시간을 stop_time에 추가)
+                    
+                    break
+                if not joystick.button_B.value: # B 버튼 -> Restart
+                    time.sleep(0.1)
+                    objects = [] # 오브젝트 없애기
+                    start_time = time.time() # 시작 시간 초기화
+                    character.reset()
+                    stop_time = 0
+                    break
         joystick.disp.image(game_image)
 
     end_time = "{:.1f}".format(time.time() - start_time) # 종료시간
