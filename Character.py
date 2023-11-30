@@ -5,8 +5,9 @@ from PIL import Image, ImageDraw, ImageFont
 class Character:
     def __init__(self, width, height):
         self.appearance = 'astrounaut'
-        self.image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/astronaut.png").resize((30, 30))
-        self.superimage = Image.open("/home/kau-esw/esw/TA-ESW/game/png/superhero.png").resize((30, 30))
+        self.size = 30
+        self.image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/astronaut.png").resize((self.size, self.size))
+        self.superimage = Image.open("/home/kau-esw/esw/TA-ESW/game/png/superhero.png").resize((self.size, self.size))
         self.state = None
         self.disp_size = (width, height)
         self.position = np.array([width / 2 - 15, height / 2 - 15, width / 2 + 15, height / 2 + 15])

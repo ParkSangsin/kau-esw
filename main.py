@@ -152,17 +152,6 @@ def main():
             if item.state == 'hit' or item.state == 'used':
                 items.pop(i)
 
-        # 현재 캐릭터가 살았는지 죽었는지를 체크
-        if character.life_check():
-            for angle in range(0, 720, 25):
-                rotated_image = character.image.rotate(angle)
-                game_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/game.jpg").resize((joystick.width, joystick.height))
-                game_image.paste(rotated_image, tuple(map(int, character.position)), rotated_image)
-                joystick.disp.image(game_image)
-                character.position[1] += 7
-                character.position[3] += 7
-            break
-
         # 캐릭터 이동
         character.move(command)
     
@@ -211,6 +200,18 @@ def main():
             else:
                 game_image.paste(character.superimage, tuple(map(int, character.position)), character.superimage) # 에너지 사용시 사진 변경
             
+        # 현재 캐릭터가 살았는지 죽었는지를 체크 
+        if character.life_check():
+            angel_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/angel.png").resize((character.size, character.size))
+            tmp_position = character.position[3]
+            while character.position[3] > tmp_position - 70: 
+                tmp_image = game_image.copy()
+                tmp_image.paste(angel_image, tuple(map(int, character.position)), angel_image)
+                joystick.disp.image(tmp_image)
+                character.position[1] -= 5
+                character.position[3] -= 5
+            break 
+
         # 다른 이미지를 그린 후 PAUSE를 그리기 위해 마지막에 체크
         if not joystick.button_B.value:  # B 버튼
             check_time = time.time()
