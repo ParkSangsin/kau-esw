@@ -29,12 +29,13 @@ class Item:
         if collision:
             self.state = 'hit'
             if self.name == 'life':
-                character.life += 1
+                if character.life + 25 >= 100:
+                    character.life = 100
+                else:
+                    character.life += 25
             elif self.name == 'energy':
                 character.energy += 1
-            """elif self.name == 'superpower':
-                character.super()
-"""
+                
     # object의 위치와 other의 위치가 겹치면 True 반환
     def overlap(self, ego, other):
         if ego[0] + 5 <= other[2] and ego[1] + 5 <= other[3] - 5 and ego[2] - 5 >= other[0] and ego[3] - 5 >= other[1]: # 오차를 줄이기 위해 충돌 조건 완화

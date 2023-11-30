@@ -37,10 +37,10 @@ def main():
     end_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 20, (15, 10)) # 종료화면 텍스트 폰트 설정
     end_score = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (145, 80)) # 종료화면 점수 표시 텍스트 설정
     press_text = Font("/home/kau-esw/esw/TA-ESW/game/font/KdamThmorPro-Regular.ttf", 18, (30, 150)) # "Prees anykey to play" 폰트 설정
-    score_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (5, 5)) # 점수 표시 텍스트 폰트 설정
-    energy_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (163, 5)) # 에너지 표시 텍스트 폰트 설정
-    life_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (163, 25)) # 목숨 표시 텍스트 폰트 설정 (후에 하트 사진으로 변경)
-    stage_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (95, 5))
+    score_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (2, 5)) # 점수 표시 텍스트 폰트 설정
+    energy_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (163, 25)) # 에너지 표시 텍스트 폰트 설정
+    life_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (170, 5)) # 목숨 표시 텍스트 폰트 설정 (후에 하트 사진으로 변경)
+    stage_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (87, 5))
 
     start_draw.text(title_text.position, "The   Draft   in   Space", fill = "gray", font = title_text.font) # 게임 제목
     start_draw.text(press_text.position, "Press  anykey  to  play", fill = "red", font = press_text.font)
@@ -74,12 +74,12 @@ def main():
         score = "{:.1f}".format(cur_time - start_time) # 게임 진행 시간 = 점수 (소수점 첫째자리까지)
         
         # item이 나올 확률 조정
-        rand_item_gen = random.randint(1, 275)
+        rand_item_gen = random.randint(1, 300)
         if rand_item_gen == 1: 
             items.append(Item())
         
         # object가 나올 확률 조정
-        if float(score) % 10.0 == 0 and stage <= 6 and stage_flag:
+        if float(score) % 15.0 == 0 and stage <= 6 and stage_flag:
             stage_flag = False
             stage_num -= 1
             stage += 1
@@ -108,7 +108,7 @@ def main():
             command['right_pressed'] = True
             command['move'] = True
 
-        if not joystick.button_A.value and a_flag == True: # A pressed
+        if not joystick.button_A.value and a_flag == True and collision_flag: # A pressed
             # energy가 0 이상이면, 3초 동안 속도 2배 증가
             if character.energy_check():
                 character.energy -= 1
@@ -157,8 +157,13 @@ def main():
         game_draw = ImageDraw.Draw(game_image) # game_image와 draw 연동 (game_image위에 그릴 도구)
         game_draw.text(score_text.position, "SCORE: " + score, fill = "blue", font = score_text.font) # game_image 위에 점수 그리기
         game_draw.text(energy_text.position, "ENERGY: " + str(character.energy), fill = "green", font = energy_text.font) # game_image 위에 남은 에너지 그리기
-        game_draw.text(life_text.position, "LIFE: " + str(character.life), fill = "red", font = life_text.font) # game_image 위에 남은 에너지 그리기
-        game_draw.text(stage_text.position, "Stage  " + str(stage), fill = "yellow", font = stage_text.font)
+        game_draw.text(life_text.position, "HP: " + str(character.life), fill = "red", font = life_text.font) # game_image 위에 남은 에너지 그리기
+        
+        if stage == 7:
+            game_draw.text(stage_text.position, "Final Stage", fill = "yellow", font = stage_text.font)
+        else:
+            game_draw.text(stage_text.position, "Stage  " + str(stage), fill = "yellow", font = stage_text.font)
+
 
         for object in objects:
             game_image.paste(object.image, tuple(map(int, object.position)), object.image)
@@ -243,8 +248,6 @@ def main():
         if not joystick.button_U.value or not joystick.button_D.value or not joystick.button_L.value or not joystick.button_R.value or not joystick.button_A.value or not joystick.button_B.value:
             time.sleep(0.5) # 누른 키가 점수판 화면에 적용되지 않도록 잠시 멈춤
             break
-
-    
 
 if __name__ == '__main__':
     while True:

@@ -13,8 +13,8 @@ class Character:
         #self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
         self.outline = "#FFFFFF"
         self.speed = 5 # 캐릭터 속도 기본 값
-        self.energy = 3 # 캐릭터 에너지
-        self.life = 3 # 캐릭터 목숨
+        self.energy = 2 # 캐릭터 에너지
+        self.life = 100 # 캐릭터 목숨
         self.collision_effect = True
 
     def move(self, command = None):
