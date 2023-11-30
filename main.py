@@ -12,12 +12,8 @@ from Joystick import Joystick
 from Font import Font
 from Object import Object
 from Item import Item
-#import pygame 
-
-#pygame.init() # Pygame 초기화
 
 score_list = ['0.0'] * 6
-
 
 def main():
     global score_list
@@ -40,7 +36,7 @@ def main():
     score_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (2, 5)) # 점수 표시 텍스트 폰트 설정
     energy_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (163, 25)) # 에너지 표시 텍스트 폰트 설정
     life_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (170, 5)) # 목숨 표시 텍스트 폰트 설정 (후에 하트 사진으로 변경)
-    stage_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (87, 5))
+    stage_text = Font("~/esw/TA-ESW/game/font/Agbalumo-Regular.ttf", 15, (90, 5))
 
     start_draw.text(title_text.position, "The   Draft   in   Space", fill = "gray", font = title_text.font) # 게임 제목
     start_draw.text(press_text.position, "Press  anykey  to  play", fill = "red", font = press_text.font)
@@ -64,6 +60,7 @@ def main():
     collision_time = 0 # 충돌 시간
     collision_effect = True # 충돌 effect 구현
     collision_flag = True
+    collision_objects = [] # 충돌 object 저장
 
     objects = [] # 장애물 객체를 저장하는 배열
     items = []
@@ -137,7 +134,8 @@ def main():
             if object.state == 'hit' and collision_flag:
                 if a_flag:
                     collision_time = time.time()
-                objects.pop(i)
+                collision_objects.append([objects.pop(i), 1]) # 충돌 위치와 사용할 프레임 저장
+                
             if object.center[0] < 0 or object.center[0] > joystick.height or object.center[1] < 0 or object.center[1] > joystick.width: # 화면 밖으로 벗어난객체 삭제
                 objects.pop(i) 
 
@@ -170,6 +168,29 @@ def main():
 
         for item in items:
             game_image.paste(item.image, tuple(map(int, item.position)), item.image)
+
+        for i, ob in enumerate(collision_objects):
+            if ob[1] == 1:
+                collision_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/boom6.png").resize((ob[0].size, ob[0].size))
+                game_image.paste(collision_image, tuple(map(int, ob[0].position)), collision_image)
+            elif ob[1] == 2:
+                collision_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/boom5.png").resize((ob[0].size, ob[0].size))
+                game_image.paste(collision_image, tuple(map(int, ob[0].position)), collision_image)
+            elif ob[1] == 3:
+                collision_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/boom4.png").resize((ob[0].size, ob[0].size))
+                game_image.paste(collision_image, tuple(map(int, ob[0].position)), collision_image)
+            elif ob[1] == 4:
+                collision_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/boom3.png").resize((ob[0].size, ob[0].size))
+                game_image.paste(collision_image, tuple(map(int, ob[0].position)), collision_image)
+            elif ob[1] == 5:
+                collision_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/boom2.png").resize((ob[0].size, ob[0].size))
+                game_image.paste(collision_image, tuple(map(int, ob[0].position)), collision_image)
+            elif ob[1] == 6:
+                collision_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/boom1.png").resize((ob[0].size, ob[0].size))
+                game_image.paste(collision_image, tuple(map(int, ob[0].position)), collision_image)
+            else:
+                collision_objects.pop(i)
+            ob[1] += 1
 
         if collision_effect:
             if a_flag:
@@ -215,9 +236,6 @@ def main():
     # score_image에 그릴 도구 score_draw 생성
     score_draw = ImageDraw.Draw(score_image)
 
-    #score_draw.text(end_text.position, "You   Dead", fill = "red", font = end_text.font)
-    #end_draw.text(end_score.position, "SCORE: " + score, fill = "red", font = end_score.font)
-
     score_image_text = Font("/home/kau-esw/esw/TA-ESW/game/font/Roboto-Black.ttf", 30, (40, 20))
     score_draw.text(score_image_text.position, "S  C  O  R  E", fill = "yellow", font = score_image_text.font)
 
@@ -228,17 +246,19 @@ def main():
     score_left_start_position = [20, 110]
     for i, string in enumerate(score_list[0:3]):
         string_score_text = Font("/home/kau-esw/esw/TA-ESW/game/font/Roboto-Black.ttf", 20, score_left_start_position)
-        score_draw.text(string_score_text.position, f"{i+1})  {string}", fill = "blue", font = string_score_text.font)
         if string == end_time:
             score_draw.text(string_score_text.position, f"{i+1})  {string}", fill = "red", font = string_score_text.font)
+        else:
+            score_draw.text(string_score_text.position, f"{i+1})  {string}", fill = "blue", font = string_score_text.font)
         score_left_start_position[1] += 40
     
     score_right_start_position = [130, 110]
     for i, string in enumerate(score_list[3:6]):
         string_score_text = Font("/home/kau-esw/esw/TA-ESW/game/font/Roboto-Black.ttf", 20, score_right_start_position) 
-        score_draw.text(string_score_text.position, f"{i+4})  {string}", fill = "blue", font = string_score_text.font)
         if string == end_time:
-            score_draw.text(string_score_text.position, f"{i+1})  {string}", fill = "red", font = string_score_text.font)
+            score_draw.text(string_score_text.position, f"{i+4})  {string}", fill = "red", font = string_score_text.font)
+        else:
+            score_draw.text(string_score_text.position, f"{i+4})  {string}", fill = "blue", font = string_score_text.font)
         score_right_start_position[1] += 40
 
     joystick.disp.image(score_image)

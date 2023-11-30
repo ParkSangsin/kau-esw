@@ -44,7 +44,7 @@ class Object:
 
         self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2]) # 위치가 결정되고 center 초기화
 
-        self.damage = int((self.size + self.speed * 3.5) // 2)
+        self.damage = int((self.size + self.speed * 3.5) // 2) # 속도와 크기의 데미지 비중을 1:1로 구현
 
     def move(self):
         if self.direction['up']:
