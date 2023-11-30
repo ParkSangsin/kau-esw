@@ -154,6 +154,13 @@ def main():
 
         # 현재 캐릭터가 살았는지 죽었는지를 체크
         if character.life_check():
+            for angle in range(0, 720, 25):
+                rotated_image = character.image.rotate(angle)
+                game_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/game.jpg").resize((joystick.width, joystick.height))
+                game_image.paste(rotated_image, tuple(map(int, character.position)), rotated_image)
+                joystick.disp.image(game_image)
+                character.position[1] += 7
+                character.position[3] += 7
             break
 
         # 캐릭터 이동
@@ -221,6 +228,7 @@ def main():
                 if not joystick.button_B.value: # B 버튼 -> Restart
                     time.sleep(0.1)
                     objects = [] # 오브젝트 없애기
+                    items = [] # 아이템 없애기
                     start_time = time.time() # 시작 시간 초기화
                     character.reset()
                     stop_time = 0
