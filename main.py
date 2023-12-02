@@ -108,7 +108,7 @@ def main():
         game_draw = ImageDraw.Draw(game_image) # game_image와 draw 연동 (game_image위에 그릴 도구)
         
         # item이 나올 확률 조정
-        rand_item_gen = random.randint(1, 30) #300
+        rand_item_gen = random.randint(1, 300) #300
         if rand_item_gen == 1: 
             items.append(Item())
         
