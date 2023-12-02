@@ -12,10 +12,32 @@ from Joystick import Joystick
 from Font import Font
 from Object import Object
 from Item import Item
+from pygame import mixer
 
 score_list = ['0.0'] * 6
 
+mixer.init()
+start_background_sound = mixer.Sound("/home/kau-esw/esw/TA-ESW/game/sound/start_background.wav")
+start_background_sound.set_volume(0.2)
+game_background_sound = mixer.Sound("/home/kau-esw/esw/TA-ESW/game/sound/game_background.wav")
+game_background_sound.set_volume(0.2)
+dead_background_sound = mixer.Sound("/home/kau-esw/esw/TA-ESW/game/sound/dead_background.wav")
+dead_background_sound.set_volume(0.2)
+score_background_sound = mixer.Sound("/home/kau-esw/esw/TA-ESW/game/sound/score_background.wav")
+score_background_sound.set_volume(0.2)
+crash_effect_sound = mixer.Sound("/home/kau-esw/esw/TA-ESW/game/sound/crash_effect.wav")
+crash_effect_sound.set_volume(0.2)
+die_effect_sound = mixer.Sound("/home/kau-esw/esw/TA-ESW/game/sound/die_effect.wav")
+die_effect_sound.set_volume(0.2)
+item_effect_sound = mixer.Sound("/home/kau-esw/esw/TA-ESW/game/sound/item_effect.wav")
+item_effect_sound.set_volume(0.2)
+
+background_channel = mixer.Channel(0)
+effect_channel = mixer.Channel(1)
+
 def main():
+    mixer.init()
+
     global score_list
     # 조이스틱 객체 생성
     joystick = Joystick()
@@ -43,10 +65,12 @@ def main():
     start_draw.text(press_text.position, "Press  anykey  to  play", fill = "white", font = press_text.font)
     joystick.disp.image(start_image)
 
+    background_channel.play(start_background_sound, -1)
     # 시작 화면 구성
     while True:
         # 아무 키를 누르면 게임 시작
         if not joystick.button_U.value or not joystick.button_D.value or not joystick.button_L.value or not joystick.button_R.value or not joystick.button_A.value or not joystick.button_B.value:
+            background_channel.stop()
             time.sleep(0.5) # 누른 키가 게임에 적용되지 않도록 잠시 멈춤
             break
         
@@ -69,6 +93,8 @@ def main():
     character = Character(joystick.width, joystick.height) # 캐릭터 객체 생성
 
     stop_time = 0 # 멈춘 시간
+
+    background_channel.play(game_background_sound, -1)
 
     start_time = time.time() # 게임 시작 시간
 
@@ -141,6 +167,7 @@ def main():
             # 에너지가 사용되지 않는 동안만 충돌체크
             object.collision_check(character, a_flag, collision_flag)
             if object.state == 'hit' and collision_flag:
+                effect_channel.play(crash_effect_sound)
                 if a_flag:
                     collision_time = time.time()
                 collision_objects.append([objects.pop(i), 1]) # 충돌 위치와 사용할 프레임 저장
@@ -150,7 +177,8 @@ def main():
 
         for i, item in enumerate(items):
             item.collision_check(character)
-            if item.state == 'hit' or item.state == 'used':
+            if item.state == 'hit':
+                effect_channel.play(item_effect_sound)
                 items.pop(i)
 
         # 캐릭터 이동
@@ -208,6 +236,7 @@ def main():
             
         # 현재 캐릭터가 살았는지 죽었는지를 체크 
         if character.life_check():
+            effect_channel.play(die_effect_sound)
             angel_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/angel.png").resize((character.size, character.size))
             tmp_position = character.position[3]
             while character.position[3] > tmp_position - 70: 
@@ -226,29 +255,38 @@ def main():
             game_draw.text(restart_text.position, "B:  R e s t a r t", fill = "white", font = restart_text.font)
             joystick.disp.image(game_image)
             time.sleep(0.3)
+            background_channel.pause()
             while True: 
                 if not joystick.button_A.value: # A 버튼 -> Resume
                     time.sleep(0.3)
+                    background_channel.unpause()
                     stop_time += time.time() - check_time # 게임 일시정지 -> 시간 흐름 정지 (pause한 시간을 stop_time에 추가)
-                    
                     break
                 if not joystick.button_B.value: # B 버튼 -> Restart
                     time.sleep(0.3)
+                    background_channel.play(game_background_sound, -1)
                     objects = [] # 오브젝트 없애기
                     items = [] # 아이템 없애기
                     start_time = time.time() # 시작 시간 초기화
                     character.reset()
                     stop_time = 0
+                    stage_num = 10
+                    stage = 1
                     break
+
         joystick.disp.image(game_image)
 
     end_time = "{:.1f}".format(time.time() - start_time) # 종료시간
+
+    background_channel.stop()
+
     score_list.append(end_time) # 점수판에 이번 게임의 점수 삽입
     score_list = list(map(float, score_list)) # 점수판 내용을 실수 변환 후
     score_list = sorted(score_list, reverse=True) # 점수판 내용을 내림차순 정렬
     score_list = list(map(str, score_list)) # 점수판 내용을 다시 문자열로 변환
-    # 종료 화면 구성
 
+    # 종료 화면 구성
+    background_channel.play(dead_background_sound, -1)
     # joystick width, height에 맞는 종료화면 이미지 생성
     end_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/endimage.png").resize((joystick.width, joystick.height))
 
@@ -261,15 +299,18 @@ def main():
     joystick.disp.image(end_image)
 
     # 죽고 난 후 버튼 눌러짐 방지를 위해 잠시 일시정지
-    time.sleep(1)
+    time.sleep(0.5)
     
     while True:
         # 아무 키를 누르면 점수판 화면으로 이동
         if not joystick.button_U.value or not joystick.button_D.value or not joystick.button_L.value or not joystick.button_R.value or not joystick.button_A.value or not joystick.button_B.value:
+            background_channel.stop()
             time.sleep(0.5) # 누른 키가 점수판 화면에 적용되지 않도록 잠시 멈춤
             break
     
     # 점수판 화면 구성
+
+    background_channel.play(score_background_sound, -1)
 
     # joystick width, height에 맞는 점수판 화면 이미지 생성
     score_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/game.jpg").resize((joystick.width, joystick.height))
@@ -308,7 +349,9 @@ def main():
         # 아무 키를 누르면 다시 시작 화면으로 이동
         if not joystick.button_U.value or not joystick.button_D.value or not joystick.button_L.value or not joystick.button_R.value or not joystick.button_A.value or not joystick.button_B.value:
             time.sleep(0.5) # 누른 키가 점수판 화면에 적용되지 않도록 잠시 멈춤
+            background_channel.stop()
             break
+    mixer.quit()
 
 if __name__ == '__main__':
     while True:
