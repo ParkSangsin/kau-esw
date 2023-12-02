@@ -32,6 +32,8 @@ die_effect_sound.set_volume(0.2)
 item_effect_sound = mixer.Sound("/home/kau-esw/esw/TA-ESW/game/sound/item_effect.wav")
 item_effect_sound.set_volume(0.2)
 
+# alsamixer를 터미널에 입력하여 소리 설정 가능
+
 background_channel = mixer.Channel(0)
 effect_channel = mixer.Channel(1)
 

@@ -1,6 +1,7 @@
 import numpy as np
 import random
 from PIL import Image, ImageDraw, ImageFont
+import math
 
 class Item:
     def __init__(self):   
@@ -43,7 +44,14 @@ class Item:
                 
     # object의 위치와 other의 위치가 겹치면 True 반환
     def overlap(self, ego, other):
-        if ego[0] + 5 <= other[2] and ego[1] + 5 <= other[3] - 5 and ego[2] - 5 >= other[0] and ego[3] - 5 >= other[1]: # 오차를 줄이기 위해 충돌 조건 완화
+        ego_center = np.array([(ego[0] + ego[2]) / 2, (ego[1]+ ego[3]) / 2])
+        other_center = np.array([(other[0] + other[2]) / 2, (other[1]+ other[3]) / 2])
+
+        distance = math.sqrt((other_center[0] - ego_center[0]) ** 2 + (other_center[1] - ego_center[1]) ** 2)
+
+        r_r = ((ego[2] - ego[0]) / 2) + ((other[2] - other[0]) / 2)
+
+        if distance + 4 <= r_r:
             return True
         else:
             return False
