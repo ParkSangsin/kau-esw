@@ -80,7 +80,7 @@ def main():
         game_draw = ImageDraw.Draw(game_image) # game_image와 draw 연동 (game_image위에 그릴 도구)
         
         # item이 나올 확률 조정
-        rand_item_gen = random.randint(1, 300)
+        rand_item_gen = random.randint(1, 300) #300
         if rand_item_gen == 1: 
             items.append(Item())
         
@@ -125,8 +125,9 @@ def main():
         a_flag = character.a_pressed_check(a_time, cur_time)
 
         # 충돌 이펙트 구현
-        if a_flag or collision_flag: # 평상시에만 충돌 체크
+        if a_flag or collision_flag or character.shield == False: # 평상시에만 충돌 체크
             collision_flag = character.collision_check(collision_time, cur_time)
+        
         if collision_flag: # 충돌 후 2초가 지나면 True로 고정
             collision_effect = True
         else: # 충돌 후 2초 간 이펙트 생성
@@ -171,6 +172,7 @@ def main():
         for item in items:
             game_image.paste(item.image, tuple(map(int, item.position)), item.image)
 
+        # object 파괴 이펙트 구현
         for i, ob in enumerate(collision_objects):
             if ob[1] == 1:
                 collision_image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/boom6.png").resize((ob[0].size, ob[0].size))
@@ -194,11 +196,15 @@ def main():
                 collision_objects.pop(i)
             ob[1] += 1
 
-        if collision_effect:
-            if a_flag:
-                game_image.paste(character.image, tuple(map(int, character.position)), character.image) # 캐릭터 그리기 (맨 위에 그리기 -> 캐릭터가 가리지 않도록)
+        
+        if a_flag:
+            if character.shield:
+                game_image.paste(character.shieldimage, tuple(map(int, character.position)), character.shieldimage)
             else:
-                game_image.paste(character.superimage, tuple(map(int, character.position)), character.superimage) # 에너지 사용시 사진 변경
+                if collision_effect:
+                    game_image.paste(character.image, tuple(map(int, character.position)), character.image) # 캐릭터 그리기 (맨 위에 그리기 -> 캐릭터가 가리지 않도록)
+        else:
+            game_image.paste(character.superimage, tuple(map(int, character.position)), character.superimage) # 에너지 사용시 사진 변경
             
         # 현재 캐릭터가 살았는지 죽었는지를 체크 
         if character.life_check():
@@ -222,12 +228,12 @@ def main():
             time.sleep(0.3)
             while True: 
                 if not joystick.button_A.value: # A 버튼 -> Resume
-                    time.sleep(0.1)
+                    time.sleep(0.3)
                     stop_time += time.time() - check_time # 게임 일시정지 -> 시간 흐름 정지 (pause한 시간을 stop_time에 추가)
                     
                     break
                 if not joystick.button_B.value: # B 버튼 -> Restart
-                    time.sleep(0.1)
+                    time.sleep(0.3)
                     objects = [] # 오브젝트 없애기
                     items = [] # 아이템 없애기
                     start_time = time.time() # 시작 시간 초기화

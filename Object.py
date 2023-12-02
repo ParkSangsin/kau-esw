@@ -70,7 +70,10 @@ class Object:
         collision = self.overlap(self.position, character.position)
         if collision and collision_flag:
             if a_flag: # energy를 사용 or 직전에 충돌했을 경우 life 변화 X
-                character.life -= self.damage
+                if character.shield == True: # 실드가 있을경우 실드만 해제
+                    character.shield = False
+                else:
+                    character.life -= self.damage
             self.state = 'hit'
 
     # object의 위치와 other의 위치가 겹치면 True 반환

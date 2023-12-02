@@ -7,7 +7,8 @@ class Character:
         self.appearance = 'astrounaut'
         self.size = 30
         self.image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/astronaut.png").resize((self.size, self.size))
-        self.superimage = Image.open("/home/kau-esw/esw/TA-ESW/game/png/superhero.png").resize((self.size, self.size))
+        self.superimage = Image.open("/home/kau-esw/esw/TA-ESW/game/png/superhero.png").resize((50, 50))
+        self.shieldimage = Image.open("/home/kau-esw/esw/TA-ESW/game/png/shield_astronaut2.png").resize((self.size, self.size))
         self.state = None
         self.disp_size = (width, height)
         self.position = np.array([width / 2 - 15, height / 2 - 15, width / 2 + 15, height / 2 + 15])
@@ -16,6 +17,8 @@ class Character:
         self.energy = 2 # 캐릭터 에너지
         self.life = 100 # 캐릭터 목숨
         self.collision_effect = True
+        self.a_flag = True
+        self.shield = False
 
     def move(self, command = None):
         if command['move'] == False:
@@ -48,10 +51,24 @@ class Character:
 
     def a_pressed_check(self, a_time, cur_time):
         if cur_time - a_time < 2: # 2초 동안
-            self.speed = 10 
+            self.speed = 15 
+            self.size = 50
+            if self.a_flag == True:
+                self.position[0] -= 10
+                self.position[1] -= 10
+                self.position[2] += 10
+                self.position[3] += 10
+                self.a_flag = False
             return False # A 버튼을 누를 수 없는 상태 (speed가 10인 상태) 이면 False
         else:
             self.speed = 5
+            self.size = 30
+            if self.a_flag == False:
+                self.position[0] += 10
+                self.position[1] += 10
+                self.position[2] -= 10
+                self.position[3] -= 10
+                self.a_flag = True
             return True # A 버튼을 누를 수 있는 상태 (speed가 5인 상태) 이면 True
     
     def collision_check(self, collision_time, cur_time):
@@ -78,4 +95,8 @@ class Character:
         self.position = np.array([self.disp_size[0] / 2 - 15, self.disp_size[1] / 2 - 15, self.disp_size[0] / 2 + 15, self.disp_size[1] / 2 + 15])
         self.energy = 2 # 캐릭터 에너지
         self.life = 100 # 캐릭터 목숨
+        self.shield = False
+        self.size = 30
+        self.a_flag = True
+        self.shield = False
             
