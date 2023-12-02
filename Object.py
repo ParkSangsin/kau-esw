@@ -71,22 +71,13 @@ class Object:
         collision = self.overlap(self.position, character.position)
         if collision and collision_flag:
             if a_flag: # energy를 사용 or 직전에 충돌했을 경우 life 변화 X
-                if character.shield == True: # 실드가 있을경우 실드만 해제
-                    character.shield = False
-                else:
+                if character.shield == False: # 실드가 있을경우 실드만 해제
                     character.life -= self.damage
             self.state = 'hit'
 
-    # object의 위치와 other의 위치가 겹치면 True 반환
+     # object의 위치와 other의 위치가 겹치면 True 반환
     def overlap(self, ego, other):
-        ego_center = np.array([(ego[0] + ego[2]) / 2, (ego[1]+ ego[3]) / 2])
-        other_center = np.array([(other[0] + other[2]) / 2, (other[1]+ other[3]) / 2])
-
-        distance = math.sqrt((other_center[0] - ego_center[0]) ** 2 + (other_center[1] - ego_center[1]) ** 2)
-
-        r_r = ((ego[2] - ego[0]) / 2) + ((other[2] - other[0]) / 2)
-
-        if distance + 4 <= r_r:
+        if ego[0] + 5 <= other[2] and ego[1] + 5 <= other[3] - 5 and ego[2] - 5 >= other[0] and ego[3] - 5 >= other[1]: # 오차를 줄이기 위해 충돌 조건 완화
             return True
         else:
             return False

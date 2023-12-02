@@ -108,7 +108,7 @@ def main():
         game_draw = ImageDraw.Draw(game_image) # game_image와 draw 연동 (game_image위에 그릴 도구)
         
         # item이 나올 확률 조정
-        rand_item_gen = random.randint(1, 300) #300
+        rand_item_gen = random.randint(1, 30) #300
         if rand_item_gen == 1: 
             items.append(Item())
         
@@ -153,7 +153,7 @@ def main():
         a_flag = character.a_pressed_check(a_time, cur_time)
 
         # 충돌 이펙트 구현
-        if a_flag or collision_flag or character.shield == False: # 평상시에만 충돌 체크
+        if a_flag or collision_flag: # 평상시에만 충돌 체크
             collision_flag = character.collision_check(collision_time, cur_time)
         
         if collision_flag: # 충돌 후 2초가 지나면 True로 고정
@@ -170,8 +170,11 @@ def main():
             object.collision_check(character, a_flag, collision_flag)
             if object.state == 'hit' and collision_flag:
                 effect_channel.play(crash_effect_sound)
-                if a_flag:
+                if a_flag and character.shield == False:
                     collision_time = time.time()
+                else:
+                    if a_flag:
+                        character.shield = False
                 collision_objects.append([objects.pop(i), 1]) # 충돌 위치와 사용할 프레임 저장
                 
             if object.center[0] < 0 or object.center[0] > joystick.height or object.center[1] < 0 or object.center[1] > joystick.width: # 화면 밖으로 벗어난객체 삭제
@@ -227,10 +230,9 @@ def main():
             ob[1] += 1
 
         
-        if a_flag:
-            if character.shield:
-                game_image.paste(character.shieldimage, tuple(map(int, character.position)), character.shieldimage)
-            else:
+        if a_flag and character.shield:
+            game_image.paste(character.shieldimage, tuple(map(int, character.position)), character.shieldimage)
+        elif a_flag:
                 if collision_effect:
                     game_image.paste(character.image, tuple(map(int, character.position)), character.image) # 캐릭터 그리기 (맨 위에 그리기 -> 캐릭터가 가리지 않도록)
         else:
@@ -358,3 +360,4 @@ def main():
 if __name__ == '__main__':
     while True:
         main()
+
