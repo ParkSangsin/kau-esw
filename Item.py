@@ -51,7 +51,7 @@ class Item:
 
         r_r = ((ego[2] - ego[0]) / 2) + ((other[2] - other[0]) / 2)
 
-        if distance + 4 <= r_r:
+        if distance <= r_r - 4:
             return True
         else:
             return False
