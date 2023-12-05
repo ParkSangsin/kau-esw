@@ -31,11 +31,17 @@ die_effect_sound = mixer.Sound("/home/kau-esw/esw/TA-ESW/game/sound/die_effect.w
 die_effect_sound.set_volume(0.2)
 item_effect_sound = mixer.Sound("/home/kau-esw/esw/TA-ESW/game/sound/item_effect.wav")
 item_effect_sound.set_volume(0.2)
+stage_effect_sound = mixer.Sound("/home/kau-esw/esw/TA-ESW/game/sound/stage_sound.wav")
+stage_effect_sound.set_volume(0.2)
+energy_effect_sound = mixer.Sound("/home/kau-esw/esw/TA-ESW/game/sound/energy_sound.wav")
+energy_effect_sound.set_volume(0.2)
+
 
 # alsamixer를 터미널에 입력하여 소리 설정 가능
 
 background_channel = mixer.Channel(0)
 effect_channel = mixer.Channel(1)
+energy_channel = mixer.Channel(2)
 
 def main():
     mixer.init()
@@ -77,7 +83,7 @@ def main():
             break
         
 
-    stage_num = 11
+    stage_num = 12
     stage = 0  
     stage_flag = True
 
@@ -94,7 +100,7 @@ def main():
 
     character = Character(joystick.width, joystick.height) # 캐릭터 객체 생성
 
-    stop_time = 0 # 멈춘 시간
+    stop_time = 0 # 총 멈춘 시간
 
     background_channel.play(game_background_sound, -1)
 
@@ -113,9 +119,10 @@ def main():
             items.append(Item())
         
         # object가 나올 확률 조정
-        if float(score) % 15.0 == 0 and stage <= 6 and stage_flag:
+        if float(score) % 20.0 == 0 and stage <= 4 and stage_flag:
+            effect_channel.play(stage_effect_sound)
             stage_flag = False
-            stage_num -= 1
+            stage_num -= 2
             stage += 1
         else:
             stage_flag = True
@@ -123,7 +130,7 @@ def main():
         # 무작위 객체 생성
         rand_obj_gen = random.randint(1, stage_num)
         if rand_obj_gen == 1: 
-            objects.append(Object())
+            objects.append(Object(stage))
 
         command = {'move': False, 'up_pressed': False , 'down_pressed': False, 'left_pressed': False, 'right_pressed': False}
     
@@ -146,23 +153,12 @@ def main():
         if not joystick.button_A.value and a_flag == True and collision_flag: # A 버튼
             # energy가 0 이상이면, 3초 동안 속도 2배 증가
             if character.energy_check():
+                energy_channel.play(energy_effect_sound)
                 character.energy -= 1
                 a_time = time.time()
         
         # a버튼이 눌렸는지 계속해서 체크 (중복 누름 방지)
-        a_flag = character.a_pressed_check(a_time, cur_time)
-
-        # 충돌 이펙트 구현
-        if a_flag or collision_flag: # 평상시에만 충돌 체크
-            collision_flag = character.collision_check(collision_time, cur_time)
-        
-        if collision_flag: # 충돌 후 2초가 지나면 True로 고정
-            collision_effect = True
-        else: # 충돌 후 2초 간 이펙트 생성
-            if collision_effect == True:
-                collision_effect = False
-            else:
-                collision_effect = True
+        a_flag = character.a_pressed_check(a_time, cur_time) # PAUSE 시간은 차감 X
 
         for i, object in enumerate(objects):
             object.move()
@@ -177,8 +173,20 @@ def main():
                         character.shield = False
                 collision_objects.append([objects.pop(i), 1]) # 충돌 위치와 사용할 프레임 저장
                 
-            if object.center[0] < 0 or object.center[0] > joystick.height or object.center[1] < 0 or object.center[1] > joystick.width: # 화면 밖으로 벗어난객체 삭제
+            if object.position[0] > 240 or object.position[1] > 240 or object.position[2] < 0 or object.position[3] < 0: # 화면 밖으로 벗어난객체 삭제
                 objects.pop(i) 
+
+        # 충돌 이펙트 구현
+        if a_flag or collision_flag: # 평상시에만 충돌 체크
+            collision_flag = character.collision_check(collision_time, cur_time) # PAUSE 시간은 차감 X
+        
+        if collision_flag: # 충돌 후 2초가 지나면 True로 고정c
+            collision_effect = True
+        else: # 충돌 후 2초 간 이펙트 생성
+            if collision_effect == True:
+                collision_effect = False
+            else:
+                collision_effect = True
 
         for i, item in enumerate(items):
             item.collision_check(character)
@@ -193,7 +201,7 @@ def main():
         game_draw.text(energy_text.position, "ENERGY: " + str(character.energy), fill = "green", font = energy_text.font) # game_image 위에 남은 에너지 그리기
         game_draw.text(life_text.position, "HP: " + str(character.life), fill = "red", font = life_text.font) # game_image 위에 남은 에너지 그리기
         
-        if stage == 7:
+        if stage == 5:
             game_draw.text(stage_text.position, "Final Stage", fill = "yellow", font = stage_text.font)
         else:
             game_draw.text(stage_text.position, "Stage  " + str(stage), fill = "yellow", font = stage_text.font)
@@ -250,7 +258,7 @@ def main():
                 character.position[1] -= 5
                 character.position[3] -= 5
             break 
-
+        
         # 다른 이미지를 그린 후 PAUSE를 그리기 위해 마지막에 체크
         if not joystick.button_B.value:  # B 버튼
             check_time = time.time()
@@ -264,7 +272,7 @@ def main():
                 if not joystick.button_A.value: # A 버튼 -> Resume
                     time.sleep(0.3)
                     background_channel.unpause()
-                    stop_time += time.time() - check_time # 게임 일시정지 -> 시간 흐름 정지 (pause한 시간을 stop_time에 추가)
+                    stop_time += time.time() - check_time
                     break
                 if not joystick.button_B.value: # B 버튼 -> Restart
                     time.sleep(0.3)
@@ -274,8 +282,9 @@ def main():
                     start_time = time.time() # 시작 시간 초기화
                     character.reset()
                     stop_time = 0
-                    stage_num = 10
+                    stage_num = 12
                     stage = 1
+                    a_time = 0
                     break
 
         joystick.disp.image(game_image)

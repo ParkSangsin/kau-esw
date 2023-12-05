@@ -13,7 +13,7 @@ class Character:
         self.disp_size = (width, height)
         self.position = np.array([width / 2 - 15, height / 2 - 15, width / 2 + 15, height / 2 + 15])
         #self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2])
-        self.speed = 5 # 캐릭터 속도 기본 값
+        self.speed = 7 # 캐릭터 속도 기본 값
         self.energy = 2 # 캐릭터 에너지
         self.life = 100 # 캐릭터 목숨
         self.collision_effect = True
@@ -61,7 +61,7 @@ class Character:
                 self.a_flag = False
             return False # A 버튼을 누를 수 없는 상태 (speed가 10인 상태) 이면 False
         else:
-            self.speed = 5
+            self.speed = 7
             self.size = 30
             if self.a_flag == False:
                 self.position[0] += 10
@@ -69,7 +69,7 @@ class Character:
                 self.position[2] -= 10
                 self.position[3] -= 10
                 self.a_flag = True
-            return True # A 버튼을 누를 수 있는 상태 (speed가 5인 상태) 이면 True
+            return True # A 버튼을 누를 수 있는 상태 (speed가 7인 상태) 이면 True
     
     def collision_check(self, collision_time, cur_time):
         if cur_time - collision_time < 1: # 1초 동안

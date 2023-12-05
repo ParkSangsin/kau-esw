@@ -4,15 +4,26 @@ import math
 from PIL import Image, ImageDraw, ImageFont
 
 class Object:
-    def __init__(self):
+    def __init__(self, stage):
         self.direction = {'up' : False, 'down' : False, 'left' : False, 'right' : False}         
         self.position = np.array([])
         self.size = random.randint(10, 35)
         self.state = None
         self.image = Image.open("/home/kau-esw/esw/TA-ESW/game/png/meteor1.png").resize((self.size, self.size))
+        self.speed = 0
 
         # 랜덤으로 속도 선택
-        self.speed = random.randint(1, 10)
+        if stage == 1:
+            self.speed = random.randint(3, 5)
+        elif stage == 2:
+            self.speed = random.randint(3, 7)
+        elif stage == 3:
+            self.speed = random.randint(5, 9)
+        elif stage == 4:
+            self.speed = random.randint(5, 11)
+        elif stage == 5:
+            self.speed = random.randint(8, 13)
+            
 
         # 랜덤으로 이미지 선택
         self.rand_image = random.randint(1, 5)
@@ -31,16 +42,16 @@ class Object:
         self.rand_position = random.randint(1, 4)
         self.rand_num = random.randint(0, 240 - self.size)
         if self.rand_position == 1:
-            self.position = np.array([0, self.rand_num, self.size, self.rand_num + self.size])
+            self.position = np.array([- self.size, self.rand_num, 0, self.rand_num + self.size])
             self.direction['right'] = True
         elif self.rand_position == 2:
-            self.position = np.array([self.rand_num, 0, self.rand_num + self.size, self.size])
+            self.position = np.array([self.rand_num, - self.size, self.rand_num + self.size, 0])
             self.direction['down'] = True
         elif self.rand_position == 3:
-            self.position = np.array([240 - self.size, self.rand_num, 240, self.rand_num + self.size])
+            self.position = np.array([240, self.rand_num, 240 + self.size, self.rand_num + self.size])
             self.direction['left'] = True
         elif self.rand_position == 4:
-            self.position = np.array([self.rand_num, 240 - self.size, self.rand_num + self.size, 240])
+            self.position = np.array([self.rand_num, 240, self.rand_num + self.size, 240 + self.size])
             self.direction['up'] = True  
 
         self.center = np.array([(self.position[0] + self.position[2]) / 2, (self.position[1] + self.position[3]) / 2]) # 위치가 결정되고 center 초기화
